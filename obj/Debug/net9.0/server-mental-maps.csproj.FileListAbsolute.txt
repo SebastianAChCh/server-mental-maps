@@ -43,6 +43,7 @@ C:\Users\zacat\Documents\PersonalProjects\WebProfile\AspNetCore\Chat\server-ment
 C:\Users\zacat\Documents\PersonalProjects\WebProfile\AspNetCore\Chat\server-mental-maps\obj\Debug\net9.0\server-mental-maps.csproj.CoreCompileInputs.cache
 C:\Users\zacat\Documents\PersonalProjects\WebProfile\AspNetCore\Chat\server-mental-maps\obj\Debug\net9.0\server-mental-maps.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\zacat\Documents\PersonalProjects\WebProfile\AspNetCore\Chat\server-mental-maps\obj\Debug\net9.0\server-mental-maps.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\zacat\Documents\PersonalProjects\WebProfile\AspNetCore\Chat\server-mental-maps\obj\Debug\net9.0\server-mental-maps.sourcelink.json
 C:\Users\zacat\Documents\PersonalProjects\WebProfile\AspNetCore\Chat\server-mental-maps\obj\Debug\net9.0\rjimswa.dswa.cache.json
 C:\Users\zacat\Documents\PersonalProjects\WebProfile\AspNetCore\Chat\server-mental-maps\obj\Debug\net9.0\rjsmrazor.dswa.cache.json
 C:\Users\zacat\Documents\PersonalProjects\WebProfile\AspNetCore\Chat\server-mental-maps\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json

@@ -24,13 +24,13 @@ public class TokenService : ITokenService
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Name, userInfo.username),
             new(JwtRegisteredClaimNames.Email, userInfo.email),
-            new(ClaimTypes.Expiration, DateTime.UtcNow.AddMinutes(15).ToString())
+            new(ClaimTypes.Expiration, DateTime.UtcNow.AddMinutes(1).ToString())
         };
 
         var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(15),
+            Expires = DateTime.UtcNow.AddMinutes(1),
             Issuer = _configuration["Jwt:Issuer"],
             //Audience = _configuration["Jwt:Audience"],
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

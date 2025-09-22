@@ -1,9 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.IdentityModel.Tokens;
 using server_mental_maps.routes;
-using server_mental_maps.Service;
 
 namespace serber_mental_maps.middleware;
 
@@ -27,51 +25,85 @@ public class RenewalToken
             await _next(context);
             return;
         }
-
-        if (context.Request.Headers.TryGetValue("refreshToken", out var refreshToken))
+    
+        if (context.Request.Headers.TryGetValue("Authorization", out var authorization))
         {
-            SecurityToken validatedToken = null;
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            var bearer = authorization.ToString();
+            string token = bearer.Substring("Bearer ".Length).Trim();
 
             try
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-
-                tokenHandler.ValidateToken(refreshToken, new TokenValidationParameters
+                
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
-                    ValidateIssuer = true,
-                    //ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "")),
                     ValidIssuer = _configuration["Jwt:Issuer"],
-                    // ValidAudience = _configuration["Jwt:Audience"],
-                }, out validatedToken);
+                    ValidateIssuer = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "")),
+                    ValidateIssuerSigningKey = true,
+                    ValidateLifetime = true,
+                    //ValidAudience = _configuration["Jwt:Audience"],
+                    ValidateAudience = false,
+                }, out var validatedToken);
 
                 if (validatedToken != null)
                 {
-                    var jwtToken = validatedToken as JwtSecurityToken;
-                    var email = jwtToken?.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
-                    var username = jwtToken?.Claims.FirstOrDefault(c => c.Type == "username")?.Value;
-
-                    var accessToken = _tokenService.CreateRefreshToken(new TokenGeneration { email = email ?? "", username = username ?? "" });
-
-                    context.Response.StatusCode = 200;
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync($"{{\"Bearer\": \"{accessToken}\"}}");
                     await _next(context);
+                    return;
                 }
             }
             catch
             {
             }
+        }
+        
+        string accessToken = "";
+        SecurityToken validatedTokenTemp;
+        if (context.Request.Headers.TryGetValue("refreshtoken", out var refreshtoken))
+        {
+
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+
+                tokenHandler.ValidateToken(refreshtoken, new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "")),
+                    ValidIssuer = _configuration["Jwt:Issuer"],
+                    // ValidAudience = _configuration["Jwt:Audience"],
+                }, out validatedTokenTemp);
+
+                if (validatedTokenTemp != null)
+                {
+                    var jwtToken = validatedTokenTemp as JwtSecurityToken;
+                    var email = jwtToken?.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
+                    var username = jwtToken?.Claims.FirstOrDefault(c => c.Type == "username")?.Value;
+
+                    accessToken = _tokenService.CreateAccessToken(new TokenGeneration { email = email ?? "", username = username ?? "" });
+
+                    context.Request.Headers["Authorization"] = $"Bearer {accessToken}";
+                    context.Response.Headers.Append("X-New-Access-Token", accessToken);
+
+                }
+            }
+            catch
+            {
+                throw new UnauthorizedAccessException();
+            }
 
         }
-        else if (!context.Request.Headers.TryGetValue("refreshToken", out var refreshTokens))
+        else
         {
-            throw new UnauthorizedAccessException("No authorized");
-
+            await _next(context);
+            return;
         }
 
         await _next(context);
+
     }
 }
